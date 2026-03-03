@@ -1,37 +1,32 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../../supabase/client';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import { useInView } from 'react-intersection-observer';
 
 const Gallery = ({ photos: initialPhotos }) => {
   const [photos, setPhotos] = useState(initialPhotos);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const incrementViews = useMutation(api.photos.incrementViews);
 
   const openModal = async (photo) => {
     setSelectedPhoto(photo);
     document.body.style.overflow = 'hidden';
-    
-    try {
-      const { error } = await supabase.rpc('increment_photo_views', {
-        photo_id: photo.id
-      });
-      
-      if (error) {
-        console.error('Error incrementing views:', error);
-        return;
-      }
 
-      setPhotos(prevPhotos => 
-        prevPhotos.map(p => 
-          p.id === photo.id 
+    try {
+      await incrementViews({ id: photo._id });
+
+      setPhotos(prevPhotos =>
+        prevPhotos.map(p =>
+          p._id === photo._id
             ? { ...p, views: (p.views || 0) + 1 }
             : p
         )
       );
       setSelectedPhoto(prev => ({ ...prev, views: (prev.views || 0) + 1 }));
-      
+
     } catch (error) {
-      console.error('Error calling increment function:', error);
+      console.error('Error incrementing views:', error);
     }
   };
 
@@ -48,7 +43,6 @@ const Gallery = ({ photos: initialPhotos }) => {
     );
   }
 
-  // Variantes de animación para el contenedor
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -60,15 +54,14 @@ const Gallery = ({ photos: initialPhotos }) => {
     }
   };
 
-  // Variantes de animación para cada foto
   const photoVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 30,
       scale: 0.95
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
@@ -80,7 +73,7 @@ const Gallery = ({ photos: initialPhotos }) => {
 
   return (
     <>
-      <motion.div 
+      <motion.div
         className="grid grid-cols-2 gap-4"
         variants={containerVariants}
         initial="hidden"
@@ -88,7 +81,7 @@ const Gallery = ({ photos: initialPhotos }) => {
       >
         {photos.map((photo) => (
           <PhotoCard
-            key={photo.id}
+            key={photo._id}
             photo={photo}
             onClick={() => openModal(photo)}
             variants={photoVariants}
@@ -110,7 +103,7 @@ const Gallery = ({ photos: initialPhotos }) => {
               initial={{ scale: 0.8, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.8, opacity: 0, y: 20 }}
-              transition={{ 
+              transition={{
                 duration: 0.4,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
@@ -118,11 +111,11 @@ const Gallery = ({ photos: initialPhotos }) => {
               onClick={(e) => e.stopPropagation()}
             >
               <picture>
-                <source 
-                  srcSet={`${selectedPhoto.url}?auto=compress&cs=tinysrgb&w=1600&fm=webp`} 
-                  type="image/webp" 
+                <source
+                  srcSet={`${selectedPhoto.url}?auto=compress&cs=tinysrgb&w=1600&fm=webp`}
+                  type="image/webp"
                 />
-                <img 
+                <img
                   src={`${selectedPhoto.url}?auto=compress&cs=tinysrgb&w=1600`}
                   alt={selectedPhoto.title || 'Gallery photo'}
                   className="max-w-full max-h-[90vh] object-contain rounded-lg"
@@ -131,7 +124,7 @@ const Gallery = ({ photos: initialPhotos }) => {
                   height="2400"
                 />
               </picture>
-              
+
               <button
                 className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors text-2xl"
                 onClick={closeModal}
@@ -146,7 +139,6 @@ const Gallery = ({ photos: initialPhotos }) => {
   );
 };
 
-// Componente separado para cada foto con animaciones individuales
 const PhotoCard = ({ photo, onClick, variants }) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
@@ -160,7 +152,7 @@ const PhotoCard = ({ photo, onClick, variants }) => {
       variants={variants}
       initial="hidden"
       animate={inView ? "visible" : "hidden"}
-      whileHover={{ 
+      whileHover={{
         scale: 1.02,
         transition: { duration: 0.3 }
       }}
@@ -174,11 +166,11 @@ const PhotoCard = ({ photo, onClick, variants }) => {
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
         <picture>
-          <source 
-            srcSet={`${photo.url}?auto=compress&cs=tinysrgb&w=800&fm=webp`} 
-            type="image/webp" 
+          <source
+            srcSet={`${photo.url}?auto=compress&cs=tinysrgb&w=800&fm=webp`}
+            type="image/webp"
           />
-          <img 
+          <img
             src={`${photo.url}?auto=compress&cs=tinysrgb&w=800`}
             alt={photo.title || 'Gallery photo'}
             className="w-full h-full object-cover rounded-lg"
@@ -188,8 +180,7 @@ const PhotoCard = ({ photo, onClick, variants }) => {
           />
         </picture>
       </motion.div>
-      
-      {/* Overlay sutil al hacer hover */}
+
       <motion.div
         className="absolute inset-0 bg-black/0 rounded-lg"
         whileHover={{ backgroundColor: "rgba(0,0,0,0.1)" }}

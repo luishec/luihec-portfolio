@@ -1,39 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { supabase } from '../../supabase/client';
+import { useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 
 const FeaturedGallery = () => {
-  const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const photos = useQuery(api.photos.listFeatured);
+  const loading = photos === undefined;
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
-
-  useEffect(() => {
-    const fetchFeaturedPhotos = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('fotofolio_fotos')
-          .select('*')
-          .order('views', { ascending: false })
-          .order('id', { ascending: false })
-          .limit(6);
-
-        if (error) throw error;
-        setPhotos(data || []);
-      } catch (error) {
-        console.error('Error fetching photos:', error);
-        setPhotos([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFeaturedPhotos();
-  }, []);
 
   const container = {
     hidden: { opacity: 0 },
@@ -64,7 +42,7 @@ const FeaturedGallery = () => {
           A selection of my best and most captivating photography work. Each image has been carefully composed and edited to tell a unique story.
         </p>
       </motion.div>
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-600"></div>
@@ -78,14 +56,14 @@ const FeaturedGallery = () => {
         >
           {photos.filter(photo => !photo.nsfw).map((photo) => (
             <motion.div
-              key={photo.id}
+              key={photo._id}
               variants={item}
               className="overflow-hidden rounded-lg shadow-md group"
             >
               <div className="relative overflow-hidden aspect-[4/3]">
-                <img 
-                  src={photo.url} 
-                  alt={photo.title || 'Featured photo'} 
+                <img
+                  src={photo.url}
+                  alt={photo.title || 'Featured photo'}
                   className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -97,15 +75,15 @@ const FeaturedGallery = () => {
           ))}
         </motion.div>
       )}
-      
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.8, delay: 0.6 }}
         className="text-center mt-12"
       >
-        <Link 
-          to="/portfolio" 
+        <Link
+          to="/fotoblog"
           className="btn-primary inline-block"
         >
           Ver Book Fotográfico Completo

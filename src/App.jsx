@@ -1,8 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { supabase } from './supabase/client';
-
 // Pages
 import PortfolioPage from './pages/PortfolioPage';
 import AboutPage from './pages/AboutPage';

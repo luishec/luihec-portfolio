@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../supabase/client';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import AdminLogin from '../components/admin/AdminLogin';
 import PhotoUploader from '../components/admin/PhotoUploader';
 import PhotoManager from '../components/admin/PhotoManager';
@@ -8,27 +9,23 @@ import CategoryManager from '../components/admin/CategoryManager';
 import BookingManager from '../components/admin/BookingManager';
 
 const AdminPage = () => {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => localStorage.getItem('admin_token') || '');
   const [activeTab, setActiveTab] = useState('photos');
+  const logout = useMutation(api.auth.logout);
 
-  useEffect(() => {
-    // Check for an existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+  const sessionResult = useQuery(
+    api.auth.validateSession,
+    token ? { token } : "skip"
+  );
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
-    );
+  const loading = token && sessionResult === undefined;
+  const isAuthenticated = sessionResult?.valid === true;
 
-    return () => subscription.unsubscribe();
-  }, []);
+  const handleLogout = async () => {
+    await logout({ token });
+    localStorage.removeItem('admin_token');
+    setToken('');
+  };
 
   if (loading) {
     return (
@@ -38,8 +35,8 @@ const AdminPage = () => {
     );
   }
 
-  if (!session) {
-    return <AdminLogin />;
+  if (!isAuthenticated) {
+    return <AdminLogin onLogin={(t) => { localStorage.setItem('admin_token', t); setToken(t); }} />;
   }
 
   return (
@@ -56,14 +53,14 @@ const AdminPage = () => {
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
               <button
-                onClick={() => supabase.auth.signOut()}
+                onClick={handleLogout}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
                 Sign Out
               </button>
             </div>
           </div>
-          
+
           <div className="p-4 sm:p-6 border-b border-gray-200">
             <div className="flex flex-wrap gap-2">
               <TabButton
@@ -106,8 +103,8 @@ const TabButton = ({ label, active, onClick }) => {
     <button
       onClick={onClick}
       className={`px-4 py-2 rounded-md transition-colors ${
-        active 
-          ? 'bg-accent-600 text-white' 
+        active
+          ? 'bg-accent-600 text-white'
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`}
     >

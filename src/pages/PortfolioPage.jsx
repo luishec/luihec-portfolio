@@ -1,62 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../supabase/client';
+import { useQuery } from 'convex/react';
+import { api } from '../../convex/_generated/api';
 import Gallery from '../components/portfolio/Gallery';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const PortfolioPage = () => {
-  const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchPhotos();
-  }, []);
-
-  const fetchPhotos = async () => {
-    try {
-      setLoading(true);
-      
-      let query = supabase
-        .from('fotofolio_fotos')
-        .select('*')
-        .order('views', { ascending: false })
-        .order('id', { ascending: false });
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setPhotos(data || []);
-    } catch (error) {
-      console.error('Error fetching photos:', error);
-      setPhotos([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const photos = useQuery(api.photos.listAll);
+  const loading = photos === undefined;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ 
+      transition={{
         duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94]
       }}
       className="bg-gray-900 min-h-screen"
     >
-      <motion.div 
+      <motion.div
         className="container-custom py-2 md:py-4"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ 
+        transition={{
           duration: 0.7,
           delay: 0.2,
           ease: [0.25, 0.46, 0.45, 0.94]
         }}
       >
         {loading ? (
-          <motion.div 
+          <motion.div
             className="flex justify-center items-center min-h-[400px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

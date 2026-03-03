@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { supabase } from '../../supabase/client';
+import { useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 
 const PhotoUploader = () => {
   const [file, setFile] = useState(null);
@@ -10,10 +11,13 @@ const PhotoUploader = () => {
   const [message, setMessage] = useState(null);
   const [preview, setPreview] = useState(null);
 
+  const generateUploadUrl = useMutation(api.photos.generateUploadUrl);
+  const insertPhoto = useMutation(api.photos.insert);
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-    
+
     if (selectedFile) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -35,50 +39,40 @@ const PhotoUploader = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!file) {
       setMessage({ type: 'error', text: 'Please select an image to upload' });
       return;
     }
-    
+
     try {
       setUploading(true);
       setMessage(null);
-      
-      // Generate a unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `photos/${fileName}`;
-      
-      // Upload file to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from('photos')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('photos')
-        .getPublicUrl(filePath);
-        
-      // Save metadata to the database
-      const { error: dbError } = await supabase
-        .from('fotofolio_fotos')
-        .insert([
-          {
-            title,
-            description,
-            url: publicUrl,
-            nsfw
-          }
-        ]);
-        
-      if (dbError) throw dbError;
-      
+
+      // Step 1: Get a temporary upload URL from Convex
+      const uploadUrl = await generateUploadUrl();
+
+      // Step 2: Upload the file to Convex storage
+      const result = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      const { storageId } = await result.json();
+
+      // Step 3: Save photo metadata with storageId
+      await insertPhoto({
+        title: title || undefined,
+        description: description || undefined,
+        url: '',
+        storageId,
+        nsfw,
+      });
+
       setMessage({ type: 'success', text: 'Photo uploaded successfully!' });
       resetForm();
-      
+
     } catch (error) {
       console.error('Error uploading photo:', error);
       setMessage({ type: 'error', text: `Upload failed: ${error.message}` });
@@ -90,13 +84,13 @@ const PhotoUploader = () => {
   return (
     <div className="text-white">
       <h2 className="text-xl font-semibold mb-6 text-white">Upload New Photo</h2>
-      
+
       {message && (
         <div className={`p-4 mb-6 rounded-md ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
           {message.text}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -112,7 +106,7 @@ const PhotoUploader = () => {
                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
                 Description
@@ -125,7 +119,7 @@ const PhotoUploader = () => {
                 className="w-full px-4 py-2 bg-gray-600 border border-gray-500 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               ></textarea>
             </div>
-            
+
             <div className="mb-4">
               <label className="flex items-center">
                 <input
@@ -138,7 +132,7 @@ const PhotoUploader = () => {
               </label>
             </div>
           </div>
-          
+
           <div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -147,9 +141,9 @@ const PhotoUploader = () => {
               <div className="border-2 border-dashed border-gray-500 bg-gray-700 rounded-md p-6 flex flex-col items-center">
                 {preview ? (
                   <div className="mb-4 relative">
-                    <img 
-                      src={preview} 
-                      alt="Preview" 
+                    <img
+                      src={preview}
+                      alt="Preview"
                       className="max-h-48 rounded-md"
                     />
                     <button
@@ -165,7 +159,7 @@ const PhotoUploader = () => {
                     Click to upload or drag and drop
                   </div>
                 )}
-                
+
                 <div className="mt-2 flex text-sm text-gray-300">
                   <label
                     htmlFor="file-upload"
@@ -189,7 +183,7 @@ const PhotoUploader = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-end mt-6">
           <button
             type="button"

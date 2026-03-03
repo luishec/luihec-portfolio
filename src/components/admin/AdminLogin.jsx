@@ -1,30 +1,28 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../../supabase/client';
+import { useAction } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 
-const AdminLogin = () => {
+const AdminLogin = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const login = useAction(api.auth.login);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError(null);
-      
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) throw error;
-      
+
+      const { token } = await login({ email, password });
+      onLogin(token);
+
     } catch (error) {
       console.error('Error logging in:', error);
-      setError(error.message);
+      setError(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -45,13 +43,13 @@ const AdminLogin = () => {
               Sign in to access the photography portfolio admin panel
             </p>
           </div>
-          
+
           {error && (
             <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
               {error}
             </div>
           )}
-          
+
           <form onSubmit={handleLogin}>
             <div className="mb-6">
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
@@ -67,7 +65,7 @@ const AdminLogin = () => {
                 placeholder="your@email.com"
               />
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
@@ -82,7 +80,7 @@ const AdminLogin = () => {
                 placeholder="••••••••"
               />
             </div>
-            
+
             <button
               type="submit"
               disabled={loading}
@@ -91,7 +89,7 @@ const AdminLogin = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-400">
               This area is restricted to authorized personnel.
