@@ -24,6 +24,15 @@ const AboutPage = () => {
             ease: [0.25, 0.46, 0.45, 0.94]
           }}
         >
+          <motion.h1 
+            className="text-4xl md:text-5xl font-bold text-white text-center mb-8 md:mb-12 tracking-tight"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            Sobre mí
+          </motion.h1>
+
           <motion.p 
             className="text-gray-300 text-lg leading-relaxed mb-6 md:mb-8"
             initial={{ y: 20, opacity: 0 }}
