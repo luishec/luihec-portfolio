@@ -2,18 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 255, 255, 255;
-  --background-rgb: 17, 17, 17;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  color: white;
+  background-color: #111827; /* gray-900 — mismo color que header y footer */
   font-family: 'Montserrat', sans-serif;
 }
 

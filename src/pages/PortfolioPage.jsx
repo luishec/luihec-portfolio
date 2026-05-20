@@ -18,7 +18,7 @@ const PortfolioPage = () => {
         duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94]
       }}
-      className="bg-gray-900 min-h-screen"
+      className="min-h-screen"
     >
       <motion.div
         className="container-custom py-2 md:py-4"

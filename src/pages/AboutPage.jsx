@@ -11,7 +11,7 @@ const AboutPage = () => {
         duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94]
       }}
-      className="bg-gray-900 min-h-screen"
+      className="min-h-screen"
     >
       <section className="container-custom pt-4 md:pt-8 pb-16">
         <motion.div 
@@ -34,20 +34,7 @@ const AboutPage = () => {
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
           >
-            <strong>Hola, soy Luis.</strong>
-          </motion.p>
-
-          <motion.p 
-            className="text-gray-300 text-lg leading-relaxed mb-6 md:mb-8"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ 
-              duration: 0.6,
-              delay: 0.4,
-              ease: [0.25, 0.46, 0.45, 0.94]
-            }}
-          >
-            Fotógrafo con experiencia trabajando con creadores digitales, influencers y personas que buscan proyectar una imagen auténtica y coherente con su estilo de vida.
+            Especializado en imagen personal y marca visual. Trabajo con creadores digitales, influencers y figuras públicas que entienden el poder de una imagen bien construida.
           </motion.p>
 
           <motion.div 
@@ -87,7 +74,7 @@ const AboutPage = () => {
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
           >
-            Más allá de lo técnico, te asesoro para que tus fotos comuniquen quién eres y generen una conexión real con la gente que te interesa. A veces, solo hace falta una nueva perspectiva para mostrar lo mejor de ti y empezar a destacar de forma natural, sin forzar nada.
+            Creo que todos tienen una versión fotogénica de sí mismos — solo hace falta saber encontrarla. Mi trabajo va más allá de lo técnico: entiendo cómo funciona la percepción visual y cómo dirigir una imagen para que destaque de forma natural, sin forzar nada.
           </motion.p>
 
           <motion.p 
@@ -100,7 +87,7 @@ const AboutPage = () => {
               ease: [0.25, 0.46, 0.45, 0.94]
             }}
           >
-            Para muchos, más que una sesión de fotos, se convierte en una experiencia de descubrimiento. Tengo buen ojo para esos gestos y momentos que revelan tu esencia. Y entiendo cómo influye lo visual en lo que los demás perciben de ti, especialmente en el mundo digital.
+            No es solo una sesión de fotos — es un proceso donde descubrimos juntos cómo se ve tu mejor versión. Tengo buen ojo para capturar esos gestos y momentos que revelan quién eres de verdad, especialmente en el mundo digital, donde lo visual lo es todo.
           </motion.p>
 
           <motion.h2 

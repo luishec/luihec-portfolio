@@ -4,34 +4,27 @@ import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useInView } from 'react-intersection-observer';
 
-const Gallery = ({ photos: initialPhotos }) => {
-  const [photos, setPhotos] = useState(initialPhotos);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+const Gallery = ({ photos }) => {
+  const [selectedPhotoId, setSelectedPhotoId] = useState(null);
   const incrementViews = useMutation(api.photos.incrementViews);
 
+  const selectedPhoto = selectedPhotoId
+    ? photos.find((p) => p._id === selectedPhotoId) ?? null
+    : null;
+
   const openModal = async (photo) => {
-    setSelectedPhoto(photo);
+    setSelectedPhotoId(photo._id);
     document.body.style.overflow = 'hidden';
 
     try {
       await incrementViews({ id: photo._id });
-
-      setPhotos(prevPhotos =>
-        prevPhotos.map(p =>
-          p._id === photo._id
-            ? { ...p, views: (p.views || 0) + 1 }
-            : p
-        )
-      );
-      setSelectedPhoto(prev => ({ ...prev, views: (prev.views || 0) + 1 }));
-
     } catch (error) {
       console.error('Error incrementing views:', error);
     }
   };
 
   const closeModal = () => {
-    setSelectedPhoto(null);
+    setSelectedPhotoId(null);
     document.body.style.overflow = 'auto';
   };
 

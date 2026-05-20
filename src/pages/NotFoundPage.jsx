@@ -9,7 +9,7 @@ const NotFoundPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen flex flex-col justify-center items-center px-4 py-20 bg-gray-900"
+      className="min-h-screen flex flex-col justify-center items-center px-4 py-20"
     >
       <h1 className="text-9xl font-bold text-accent-200">404</h1>
       <h2 className="text-3xl md:text-4xl font-semibold mt-4 mb-6 text-center text-white">Página no encontrada</h2>

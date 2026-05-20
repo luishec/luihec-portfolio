@@ -20,7 +20,7 @@ const Footer = () => {
         <div className="flex flex-col items-center justify-center">
           <div className="text-center">
             <p className="text-gray-400 text-sm">
-              Luis H. Book Fotográfico © {new Date().getFullYear()}. All rights reserved.
+              Luis H. Book Fotográfico © {new Date().getFullYear()}. Todos los derechos reservados.
             </p>
           </div>
         </div>
